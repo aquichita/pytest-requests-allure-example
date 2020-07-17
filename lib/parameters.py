@@ -4,12 +4,18 @@ import base64
 import random
 import string
 import datetime
+from collections import OrderedDict
 
 START_DATE = "2020-01-01 00:00:00"
-END_DATE = "2030-12-31 00:00:00"
+END_DATE = "2022-12-31 00:00:00"
 
 
 def zh(length: int = 9) -> str:
+    '''
+    @msg: 随机生成指定长度的中文字符串
+    @param {type} ： length=指定长度
+    @return: 指定长度的中文字符串
+    '''
     zhs: str = ""
     for i in range(length):
         zhs += chr(random.randint(0x4e00, 0x9fbf))
@@ -50,10 +56,17 @@ def b64encrypt(s: str) -> str:
     return base64.b64encode(bytesString)
 
 
-def dater(days: int = 3, weeks: int = 0,) -> datetime:
-    local_date = datetime.datetime.today()
-    expected_date = datetime.timedelta(days=days, weeks=weeks)
-    return local_date + expected_date
+def dater(days: int = 7, weeks: int = 0,) -> datetime:
+    start_date = datetime.datetime.today()
+    work_date = datetime.timedelta(
+        days=days,
+        weeks=weeks
+    )
+    end_date = start_date + work_date
+    return OrderedDict(
+        start=start_date.strftime("%Y-%m-%d %H:%M:%S"),
+        end=end_date.strftime("%Y-%m-%d %H:%M:%S")
+    )
 
 
 def xid(length: int = 9) -> str:
@@ -62,3 +75,8 @@ def xid(length: int = 9) -> str:
                 for i in range(length)]
     random_str = ''.join(str_list)
     return default_str + random_str
+
+
+def today(parameter_list):
+    """2020-07-19 00:00:00"""
+    ...

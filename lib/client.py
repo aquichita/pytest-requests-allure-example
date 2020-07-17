@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
 import json
 import logging
 from collections import OrderedDict
@@ -11,10 +12,11 @@ import urllib3
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-_logfile = Path(".").resolve() / Path("gofers.out")
+LOGFILE = Path(".").resolve() / Path("gofers.out")
+CONFIG = os.environ.get("gofers")
 
 logging.basicConfig(
-    filename=_logfile,
+    filename=LOGFILE,
     level=logging.DEBUG
 )
 
@@ -31,9 +33,9 @@ class TMS(requests.Session):
         self.mount('http://', adapter)
         self.mount('https://', adapter)
 
-    def session(self, method, url, **kwargs):
+    def http(self, method, url, **kwargs):
         response = self.request(
-            method, url, timeout=HTTP_TIMEOUT, **kwargs)
+            method, _url(url), timeout=HTTP_TIMEOUT, **kwargs)
         info = OrderedDict(
             URL=response.request.url,
             Method=response.request.method,
@@ -48,9 +50,62 @@ class TMS(requests.Session):
                     'unicode-escape', errors="ignore"),)
             else:
                 info.update(Body=response.request.body,)
-        desc = json.dumps(info, sort_keys=True, indent=4)\
-            .encode('utf-8')\
-            .decode('unicode_escape')
+        desc = json.dumps(
+            info,
+            sort_keys=True,
+            indent=4
+        ).encode('utf-8').decode('unicode_escape')
         logging.debug(desc)
         allure.attach(desc)
         return response
+
+
+def _url(url: str):
+    if not url.startswith("http"):
+        if CONFIG["port"]:
+            base_url = "".join(
+                CONFIG["protocol"],
+                "://",
+                CONFIG["host"],
+                ":",
+                CONFIG["port"],
+            )
+        else:
+            base_url = "".join(
+                CONFIG["protocol"],
+                "://",
+                CONFIG["host"],
+            )
+        return base_url + url
+    return url
+
+
+http = TMS().http
+
+
+def get(path, params=None, **kwargs):
+    return http(method="get", url=path, params=params, **kwargs)
+
+
+def options(path, **kwargs):
+    return http(method="options", url=path, **kwargs)
+
+
+def head(path, **kwargs):
+    return http(method="head", url=path, **kwargs)
+
+
+def post(path, data=None, json=None, **kwargs):
+    return http(method="post", url=path, data=data, json=json, **kwargs)
+
+
+def put(path, data=None, **kwargs):
+    return http(method="put", url=path, data=data, **kwargs)
+
+
+def patch(path, data=None, **kwargs):
+    return http(method="patch", url=path, data=data, **kwargs)
+
+
+def delete(path, **kwargs):
+    return http(method="delete", url=path, **kwargs)
