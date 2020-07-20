@@ -2,7 +2,7 @@
 @Author: Aquichita
 @Date: 2020-07-09 17:15:27
 @LastEditors: Please set LastEditors
-@LastEditTime: 2020-07-15 16:09:05
+@LastEditTime: 2020-07-20 15:35:52
 '''
 import dataclasses
 import platform
@@ -62,7 +62,3 @@ def tms(session):
     class OP:
         materialstype = materials_type.MaterialsType()
     return OP()
-
-
-if __name__ == "__main__":
-    print(_conffile)
