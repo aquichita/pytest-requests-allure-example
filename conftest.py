@@ -1,9 +1,3 @@
-'''
-@Author: Aquichita
-@Date: 2020-07-09 17:15:27
-@LastEditors: Please set LastEditors
-@LastEditTime: 2020-07-20 15:35:52
-'''
 import dataclasses
 import platform
 import shutil
