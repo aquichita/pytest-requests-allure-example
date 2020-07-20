@@ -1,13 +1,3 @@
-'''
-@Author: your name
-@Date: 2020-07-20 15:34:58
-@LastEditTime: 2020-07-20 15:36:38
-@LastEditors: Please set LastEditors
-@Description: In User Settings Edit
-@FilePath: \pytest-requests-allure-example\lib\parameters.py
-'''
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import base64
 import random
 import string

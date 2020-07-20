@@ -1,9 +1,3 @@
-'''
-@Author: Aquichita
-@Date: 2020-07-15 11:07:05
-@LastEditors: Please set LastEditors
-@LastEditTime: 2020-07-15 16:51:30
-'''
 from dataclasses import dataclass
 from pathlib import Path
 from collections import OrderedDict
