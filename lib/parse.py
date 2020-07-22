@@ -1,6 +1,13 @@
+'''
+@Author: your name
+@Date: 2020-07-15 11:07:05
+@LastEditTime: 2020-07-21 11:20:34
+@LastEditors: Please set LastEditors
+@Description: In User Settings Edit
+@FilePath: \pytest-requests-allure-example\lib\parse.py
+'''
 from dataclasses import dataclass
 from pathlib import Path
-from collections import OrderedDict
 import sys
 
 import yaml
@@ -29,7 +36,8 @@ class Yml:
 
 
 if _conffile.exists() and str(_conffile).endswith(".yaml"):
-    conf = OrderedDict(Yml(_conffile).parametertable())
+    conf = Yml(_conffile).parametertable()
+    print(conf)
     os.environ.update(conf)
 else:
     raise FileNotFoundError(_conffile)

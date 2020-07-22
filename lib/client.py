@@ -10,7 +10,7 @@ import urllib3
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-LOGFILE = Path(".").resolve() / Path("gofers.out")
+LOGFILE = Path(".").resolve() / Path("gofers.log")
 CONFIG = os.environ.get("gofers")
 
 logging.basicConfig(
