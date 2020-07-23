@@ -1,17 +1,10 @@
-'''
-@Author: your name
-@Date: 2020-07-21 11:23:43
-@LastEditTime: 2020-07-22 11:33:56
-@LastEditors: Please set LastEditors
-@Description: In User Settings Edit
-@FilePath: \pytest-requests-allure-example\lib\log.py
-'''
-from dataclasses import dataclass
 import logging
 import os
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
+import mysql.connector
 import yaml
 
 logger = logging.getLogger()
@@ -85,14 +78,31 @@ def gen_html_rep(parameter_list):
 
 yaml.warnings({'YAMLLoadWarning': False})
 _conffile = Path(".").resolve() / Path("env.yaml")
-sql_file_teardown = Path(".").resolve() / Path("extras") / \
-    Path("data") / Path("teardown.yaml")
+sql_file_teardown = Path(".").resolve().joinpath(
+    Path("extras"),
+    Path("data"),
+    Path("teardown.yaml")
+)
 
 
 @dataclass
 class Yml:
     path: str
 
+    def __getitem__(self, key: str = None):
+        return str(self.yc[key]) if key in self.yc else None
+
+    @property
+    def parametertable(self):
+        if Path.exists(self.path):
+            with open(str(self.path), 'rb') as yf:
+                self.yc = yaml.safe_load(yf)
+            return dict(self.yc)
+
+
+@dataclass
+class mysql:
+    db_info: dict = Yml(_conffile).parametertable
     def __new__(cls, path, *args, **kwargs):
         if not hasattr(cls, '_instance'):
             with open(str(path), 'rb') as yf:
@@ -100,14 +110,21 @@ class Yml:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __getitem__(self, key: str = None):
-        return str(self.yc[key]) if key in self.yc else None
+def _cursor():
+    db = mysql.connector.connect(
+        host="172.23.16.4",
+        user="hone_dev",
+        passwd="hone_dev2020",
+        database="htms_op_business"
+    )
+    return db.cursor()
 
-    @property
-    def parametertable(self):
-        return dict(self.yc)
+
+def sql(sql):
+    _cursor().execute(sql)
 
 
 if __name__ == "__main__":
     print(Yml(_conffile).parametertable)
     print(Yml(sql_file_teardown).parametertable)
+    sql(Yml(sql_file_teardown).parametertable.get("carrier"))

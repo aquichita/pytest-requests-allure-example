@@ -1,8 +1,10 @@
 '''
-@Author: Aquichita
+@Author: your name
 @Date: 2020-07-15 15:59:46
-@LastEditors: Please set LastEditors
-@LastEditTime: 2020-07-15 16:00:33
+@LastEditTime: 2020-07-23 11:31:29
+@LastEditors: your name
+@Description: In User Settings Edit
+@FilePath: \pytest-requests-allure-example\testing\test_materials_type.py
 '''
 import allure
 import pytest
