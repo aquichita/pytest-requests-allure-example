@@ -1,2 +1,2 @@
 # 环境清理
-carrier: DELETE * FROM `htms_op_business`.`basic_servprov_b` WHERE `NAME` LIKE '%TEST-%';
+环境清理-承运商: DELETE FROM `htms_op_business`.`basic_servprov_b` WHERE `NAME` LIKE '%AT-%';

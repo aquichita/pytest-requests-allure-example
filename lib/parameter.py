@@ -1,11 +1,15 @@
+'''
+@Author: your name
+@Date: 2020-07-20 15:34:58
+@LastEditTime: 2020-07-24 15:14:00
+@LastEditors: Please set LastEditors
+@Description: In User Settings Edit
+@FilePath: \pytest-requests-allure-example\lib\parameter.py
+'''
 import base64
 import random
 import string
 import datetime
-from collections import OrderedDict
-
-START_DATE = "2020-01-01 00:00:00"
-END_DATE = "2022-12-31 00:00:00"
 
 
 def zh(length: int = 9) -> str:
@@ -26,6 +30,9 @@ def en(length: int = 16) -> str:
     zhs = "".join(zhs)
     return zhs
 
+
+def num() -> str:
+    return random.randint(500_000_000, 1000_000_000)
 
 def email(head: str = None) -> str:
     email_head = en() if not head else head
@@ -54,14 +61,14 @@ def b64encrypt(s: str) -> str:
     return base64.b64encode(bytesString)
 
 
-def dater(days: int = 7, weeks: int = 0,) -> datetime:
+def dater(days: int = 0, weeks: int = 2,) -> datetime:
     start_date = datetime.datetime.today()
     work_date = datetime.timedelta(
         days=days,
         weeks=weeks
     )
     end_date = start_date + work_date
-    return OrderedDict(
+    return dict(
         start=start_date.strftime("%Y-%m-%d %H:%M:%S"),
         end=end_date.strftime("%Y-%m-%d %H:%M:%S")
     )
@@ -78,3 +85,8 @@ def xid(length: int = 9) -> str:
 def today(parameter_list):
     """2020-07-19 00:00:00"""
     ...
+
+
+if __name__ == "__main__":
+    print(dater(weeks=2).get("start"))
+    print(num())

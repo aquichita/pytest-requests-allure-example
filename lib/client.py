@@ -1,31 +1,24 @@
-import os
 import json
-import logging
-from collections import OrderedDict
+from lib.gofers import getconfattr
 from pathlib import Path
-
+from typing import Dict
+from . import gofers
 import allure
 import requests
 import urllib3
-from requests.adapters import HTTPAdapter
+from requests.adapters import HTTPAdapter, Response
 from urllib3.util.retry import Retry
 
 LOGFILE = Path(".").resolve() / Path("gofers.log")
-CONFIG = os.environ.get("gofers")
-
-logging.basicConfig(
-    filename=LOGFILE,
-    level=logging.DEBUG
-)
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 HTTP_TIMEOUT = 60
 RETRY_TIMES = 3
 
 
-class TMS(requests.Session):
+class HttpClient(requests.Session):
     def __init__(self):
-        super(TMS, self).__init__()
+        super(HttpClient, self).__init__()
         retry = Retry(connect=RETRY_TIMES, backoff_factor=0.5)
         adapter = HTTPAdapter(max_retries=retry)
         self.mount('http://', adapter)
@@ -34,7 +27,7 @@ class TMS(requests.Session):
     def http(self, method, url, **kwargs):
         response = self.request(
             method, _url(url), timeout=HTTP_TIMEOUT, **kwargs)
-        info = OrderedDict(
+        info = dict(
             URL=response.request.url,
             Method=response.request.method,
             Body=None,
@@ -53,32 +46,35 @@ class TMS(requests.Session):
             sort_keys=True,
             indent=4
         ).encode('utf-8').decode('unicode_escape')
-        logging.debug(desc)
+        gofers.info(f"请求信息: {desc}")
         allure.attach(desc)
         return response
 
 
-def _url(url: str):
+confattr = gofers.getconfattr
+
+
+def _url(url: str) -> str:
     if not url.startswith("http"):
-        if CONFIG["port"]:
-            base_url = "".join(
-                CONFIG["protocol"],
+        if confattr("port"):
+            base_url = "".join([
+                confattr("protocol"),
                 "://",
-                CONFIG["host"],
+                confattr("host"),
                 ":",
-                CONFIG["port"],
-            )
+                confattr("port")
+            ])
         else:
-            base_url = "".join(
-                CONFIG["protocol"],
+            base_url = "".join([
+                confattr("protocol"),
                 "://",
-                CONFIG["host"],
-            )
+                confattr("host")
+            ])
         return base_url + url
     return url
 
 
-http = TMS().http
+http = HttpClient().http
 
 
 def get(path, params=None, **kwargs):

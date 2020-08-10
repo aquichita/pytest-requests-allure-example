@@ -7,8 +7,7 @@ __pycache__/
 .pytest_cache/
 .vscode/
 extras/allure-2.13.3/
-allure-results/
-allure-report/
+report/
 *.log
 
 # C extensions

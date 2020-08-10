@@ -1,23 +1,25 @@
 '''
-@Author: Aquichita
+@Author: your name
 @Date: 2020-07-13 10:01:30
+@LastEditTime: 2020-07-24 17:31:13
 @LastEditors: Please set LastEditors
-@LastEditTime: 2020-07-15 15:55:11
+@Description: In User Settings Edit
+@FilePath: \pytest-requests-allure-example\steps\interfaces\public.py
 '''
+import os
 import re
 import allure
-from lib import client
-from lib.utils import getattr, setattr
+from lib import client, gofers, parameter
 
 
 @allure.step('登录认证')
 def login(
-    username=getattr('username'),
-    password=getattr('password'),
+    username=gofers.getconfattr('username'),
+    password=gofers.getconfattr('password'),
 ):
     login_info = dict(
         username=username,
-        password=password,
+        password=parameter.b64encrypt(password),
         captcha=""
     )
     client.get('/oauth/login')
@@ -35,10 +37,7 @@ def login(
         Cookie=set_cookie.split(';')[0],
     )
     authorization = client.get(
-        f"/oauth/oauth/authorize?\
-            response_type=token&\
-                client_id={client_id}&\
-                    redirect_uri={redirect_uri}",
+        f"/oauth/oauth/authorize?response_type=token&client_id={client_id}&redirect_uri={redirect_uri}",
         headers=headers302,
         allow_redirects=False
     )
@@ -48,7 +47,7 @@ def login(
             authorization.headers["Location"]
         ).group(1)
     allure.attach(access_token, "access_token")
-    setattr(Authorization=access_token)
+    os.environ.update(Authorization=access_token)
 
 
 @allure.step('获取用户信息')
@@ -57,4 +56,4 @@ def user_info():
         "/iam/hzero/v1/users/self",
         headers=dict(Authorization=getattr("Authorization"))
     )
-    setattr(tenantId=str(response.json()["tenantId"]))
+    os.environ.update(tenantId=str(response.json()["tenantId"]))

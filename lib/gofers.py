@@ -1,5 +1,7 @@
+from pyfiglet import Figlet
 import logging
 import os
+import platform
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -7,10 +9,18 @@ from pathlib import Path
 import mysql.connector
 import yaml
 
+PROJECT_ROOT = Path(".").resolve()
+REP_DIR = PROJECT_ROOT / Path("report")
+RES_DIR = REP_DIR / Path("allure-results")
+ALL_REP = REP_DIR / Path("allure-report")
+EXTRAS_DIR = PROJECT_ROOT / Path("extras")
+
 logger = logging.getLogger()
-log_file = Path.joinpath(Path(".").resolve(), Path("Gofers.log"))
+log_file = Path.joinpath(PROJECT_ROOT, Path("Gofers.log"))
+
 if Path.exists(log_file):
     os.remove(log_file)
+
 with open(log_file, mode='w', encoding='utf-8') as f:
     f.close()
 
@@ -61,15 +71,30 @@ def critical(log_meg):
     logger.error(log_meg)
 
 
-def gen_allure_rep(allure, allure_dir, allure_report):
+def _allure():
+    version = getconfattr("allure_version")
+    if platform.system() != "Windows":
+        name = "allure"
+    else:
+        name = "allure.bat"
+    return EXTRAS_DIR.joinpath(
+        Path(f"allure-{version}"),
+        Path("bin"),
+        Path(name)
+    )
+
+
+def gen_allure_rep(allure_dir):
     if allure_dir:
         try:
             print('\n')
-            os.system(f'{allure} generate -c {allure_dir} -o {allure_report}')
+            gen_cmd = f'{_allure()} generate -c {REP_DIR} -o {ALL_REP} --clean'
+            os.system(gen_cmd)
             if sys != 'Linux':
-                os.system(f'{allure} open {allure_report}')
+                open_rep_cmd = f'{_allure()} open {ALL_REP}'
+                os.system(open_rep_cmd)
         except Exception as e:
-            print(e)
+            error(e)
 
 
 def gen_html_rep(parameter_list):
@@ -78,16 +103,15 @@ def gen_html_rep(parameter_list):
 
 yaml.warnings({'YAMLLoadWarning': False})
 _conffile = Path(".").resolve() / Path("env.yaml")
-sql_file_teardown = Path(".").resolve().joinpath(
+SQL_DIR = Path(".").resolve().joinpath(
     Path("extras"),
     Path("data"),
-    Path("teardown.yaml")
 )
 
 
 @dataclass
 class Yml:
-    path: str
+    path: str = _conffile
 
     def __getitem__(self, key: str = None):
         return str(self.yc[key]) if key in self.yc else None
@@ -100,31 +124,42 @@ class Yml:
             return dict(self.yc)
 
 
+# update environment by configfile.
+os.environ.update(Yml().parametertable)
+
+
+def getconfattr(name: str) -> str:
+    return os.environ.get(name, None)
+
+
 @dataclass
 class mysql:
-    db_info: dict = Yml(_conffile).parametertable
-    def __new__(cls, path, *args, **kwargs):
-        if not hasattr(cls, '_instance'):
-            with open(str(path), 'rb') as yf:
-                cls.yc = yaml.safe_load(yf)
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
-def _cursor():
+    db_conf = Yml(_conffile).parametertable
     db = mysql.connector.connect(
-        host="172.23.16.4",
-        user="hone_dev",
-        passwd="hone_dev2020",
-        database="htms_op_business"
+        host=db_conf['db_host'],
+        user=db_conf['db_user'],
+        passwd=db_conf['db_pwd'],
+        database=db_conf['db_name'],
     )
-    return db.cursor()
+
+    @classmethod
+    def exec_sql(cls, sql):
+        cls.db.cursor().execute(sql)
+        cls.db.commit()
+
+    @classmethod
+    def exec_sqlyml(cls, sqlyml, *, msg=None):
+        info(f"{msg} start.") if msg else None
+        if Path.exists(sqlyml):
+            sqlyml = Yml(sqlyml).parametertable
+        for name, value in sqlyml.items():
+            info(f"EXECUTE SQL NAME: {name}, VALUE: {value}")
+            cls.exec_sql(sql=value)
+        cls.db.cursor().close()
+        cls.db.close()
+        info(f"{msg} end.") if msg else None
 
 
-def sql(sql):
-    _cursor().execute(sql)
-
-
-if __name__ == "__main__":
-    print(Yml(_conffile).parametertable)
-    print(Yml(sql_file_teardown).parametertable)
-    sql(Yml(sql_file_teardown).parametertable.get("carrier"))
+def projectmark():
+    f = Figlet(font="slant", width=240)
+    info("\n" + f.renderText(PROJECT_ROOT.name))

@@ -1,52 +1,40 @@
+'''
+@Author: your name
+@Date: 2020-07-20 15:34:58
+@LastEditTime: 2020-07-24 16:53:53
+@LastEditors: Please set LastEditors
+@Description: In User Settings Edit
+@FilePath: \pytest-requests-allure-example\conftest.py
+'''
 import dataclasses
-import platform
-import shutil
-from pathlib import Path
 
 from pytest import fixture
 
-from lib.utils import _conffile, gen_allure_rep, getattr
-from steps.interfaces.base_data import materials_type
-from steps.interfaces.public import login, user_info
-
-PROJECT_ROOT = Path(".").resolve()
-REP_DIR = PROJECT_ROOT / Path("report")
-RES_DIR = REP_DIR / Path("allure-results")
-ALL_REP = REP_DIR / Path("allure-report")
-EXTRAS_DIR = PROJECT_ROOT / Path("extras")
-
-
-def allure():
-    version = getattr("allure_version")
-    if platform.system() != "Windows":
-        name = "allure"
-    else:
-        name = "allure.bat"
-    return EXTRAS_DIR / \
-        Path("allure-".join(version)) / \
-        Path("bin") / \
-        Path(name)
+from lib import gofers
+from steps.interfaces import public
+from steps.interfaces.base_data.carrier_management import CarrierManagement
 
 
 def pytest_sessionstart():
-    if Path(REP_DIR).exists():
-        shutil.rmtree(path=REP_DIR)
+    gofers.projectmark()
+    gofers.mysql.exec_sqlyml(
+        gofers.SQL_DIR.joinpath("teardown.yaml"),
+        msg="环境清理"
+    )
+    ...
 
 
 def pytest_sessionfinish(session):
     # pytest --alluredir report/allure-results
     allure_dir = session.config.getoption('allure_report_dir')
-    gen_allure_rep(
-        allure=allure(),
-        allure_dir=allure_dir,
-        allure_report=ALL_REP
-    )
+    gofers.gen_allure_rep(allure_dir=allure_dir)
+    ...
 
 
 @fixture(scope="session", autouse=True)
 def session():
-    login()
-    user_info()
+    gofers.info(public.login())
+    gofers.info(public.user_info())
     ...
 
 
@@ -54,5 +42,5 @@ def session():
 def tms(session):
     @dataclasses
     class OP:
-        materialstype = materials_type.MaterialsType()
+        carrierManagement = CarrierManagement()
     return OP()
