@@ -1,4 +1,3 @@
-from pyfiglet import Figlet
 import logging
 import os
 import platform
@@ -8,6 +7,7 @@ from pathlib import Path
 
 import mysql.connector
 import yaml
+from pyfiglet import Figlet
 
 PROJECT_ROOT = Path(".").resolve()
 REP_DIR = PROJECT_ROOT / Path("report")
@@ -21,7 +21,17 @@ log_file = Path.joinpath(PROJECT_ROOT, Path("Gofers.log"))
 if Path.exists(log_file):
     os.remove(log_file)
 
+project_desc = """
+
+Realization of HTTP API automated testing wheels by pytest+requests+allure.
+
+"""
 with open(log_file, mode='w', encoding='utf-8') as f:
+    fl = Figlet(width=180)
+    log_file.write_text(project_desc + "\n\n" +
+                        fl.renderText(PROJECT_ROOT.name) +
+                        "\n\n"
+                        )
     f.close()
 
 logger.setLevel(logging.DEBUG)
@@ -88,7 +98,7 @@ def gen_allure_rep(allure_dir):
     if allure_dir:
         try:
             print('\n')
-            gen_cmd = f'{_allure()} generate -c {REP_DIR} -o {ALL_REP} --clean'
+            gen_cmd = f'{_allure()} generate -c {RES_DIR} -o {ALL_REP} --clean'
             os.system(gen_cmd)
             if sys != 'Linux':
                 open_rep_cmd = f'{_allure()} open {ALL_REP}'
@@ -158,8 +168,3 @@ class mysql:
         cls.db.cursor().close()
         cls.db.close()
         info(f"{msg} end.") if msg else None
-
-
-def projectmark():
-    f = Figlet(font="slant", width=240)
-    info("\n" + f.renderText(PROJECT_ROOT.name))

@@ -1,26 +1,25 @@
 '''
 @Author: your name
 @Date: 2020-07-13 10:01:30
-@LastEditTime: 2020-07-24 17:31:13
-@LastEditors: Please set LastEditors
+LastEditTime: 2020-08-12 15:55:27
+LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: \pytest-requests-allure-example\steps\interfaces\public.py
 '''
 import os
 import re
 import allure
-from lib import client, gofers, parameter
+from lib import client, gofers
 
 
 @allure.step('登录认证')
 def login(
-    username=gofers.getconfattr('username'),
-    password=gofers.getconfattr('password'),
+    username=os.environ.get('username'),
+    password=os.environ.get('password'),
 ):
     login_info = dict(
         username=username,
-        password=parameter.b64encrypt(password),
-        captcha=""
+        password=password,
     )
     client.get('/oauth/login')
     login_response = client.post(
@@ -47,13 +46,17 @@ def login(
             authorization.headers["Location"]
         ).group(1)
     allure.attach(access_token, "access_token")
-    os.environ.update(Authorization=access_token)
+    return dict(Authorization=access_token)
 
 
 @allure.step('获取用户信息')
 def user_info():
+    auth = login()
     response = client.get(
         "/iam/hzero/v1/users/self",
-        headers=dict(Authorization=getattr("Authorization"))
+        headers=auth
     )
-    os.environ.update(tenantId=str(response.json()["tenantId"]))
+    return dict(
+        Authorization=auth,
+        tenantId=str(response.json()["tenantId"])
+    )

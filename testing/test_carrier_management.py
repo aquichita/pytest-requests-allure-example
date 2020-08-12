@@ -1,14 +1,12 @@
 '''
 @Author: your name
 @Date: 2020-07-15 15:59:46
-@LastEditTime: 2020-07-24 17:25:15
-@LastEditors: Please set LastEditors
+LastEditTime: 2020-08-12 13:41:14
+LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: \pytest-requests-allure-example\testing\test_materials_type.py
 '''
-from lib.parameter import xid
 import allure
-import pytest
 
 
 @allure.epic("基础数据")

@@ -1,23 +1,19 @@
 '''
 @Author: your name
 @Date: 2020-07-24 11:24:47
-@LastEditTime: 2020-07-24 16:12:21
-@LastEditors: Please set LastEditors
+LastEditTime: 2020-08-12 16:25:00
+LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: \pytest-requests-allure-example\steps\interfaces\base_data\carrier_management.py
 '''
-from lib.parameter import phone
 import allure
-from lib import client, gofers, parameter
+from lib import client, parameter
 from dataclasses import dataclass
 
 
 @dataclass
 class CarrierManagement:
-    tenantId: str = gofers.getconfattr("tenantId")
-    headers = dict(
-        Authorization=gofers.getconfattr("Authorization")
-    )
+    session: dict
 
     @allure.step("新建承运商")
     def submit(self, xid, name, isActive="Y", autoAcceptTender="N", **kwargs):
@@ -43,12 +39,12 @@ class CarrierManagement:
                 "transportGrade": "1",
                 "remark": parameter.zh(length=64),
                 "__dirty": bool(1),
-                "tenantId": self.tenantId
+                "tenantId": self.session.get("tenantId")
             }
         ]
         return client.put(
-            path=f"/htms/v1/{self.tenantId}/basic/servprov/submit",
-            headers=self.headers,
+            path=f"/htms/v1/{self.session.get('tenantId')}/basic/servprov/submit",
+            headers=self.session.get("Authorization"),
             json=data,
         )
 
@@ -65,7 +61,7 @@ class CarrierManagement:
             }
         ]
         return client.get(
-            path=f"/htms/v1/{self.tenantId}/basic/servprov/query",
+            path=f"/htms/v1/{self.session.get('tenantId')}/basic/servprov/query",
             headers=self.headers,
             params=data,
         )

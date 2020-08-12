@@ -1,12 +1,10 @@
 import json
-from lib.gofers import getconfattr
 from pathlib import Path
-from typing import Dict
 from . import gofers
 import allure
 import requests
 import urllib3
-from requests.adapters import HTTPAdapter, Response
+from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 LOGFILE = Path(".").resolve() / Path("gofers.log")
@@ -32,7 +30,7 @@ class HttpClient(requests.Session):
             Method=response.request.method,
             Body=None,
             ResponseStatusCode=str(response.status_code),
-            ResponseBody=response.text,
+            ResponseBody=response.text if not "html" in response.text else None,
         )
 
         if response.request.body:
