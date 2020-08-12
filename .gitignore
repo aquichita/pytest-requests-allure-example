@@ -5,7 +5,6 @@ __pycache__/
 
 # Porject
 .pytest_cache/
-.vscode/
 extras/allure-2.13.3/
 report/
 *.log

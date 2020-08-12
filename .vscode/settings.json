@@ -1,0 +1,19 @@
+{
+    "python.testing.pytestArgs": [
+        "testing"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "cSpell.words": [
+        "TENANTID",
+        "aquichita",
+        "htms",
+        "hzero",
+        "pubkey",
+        "pyfiglet",
+        "pytest",
+        "servprov",
+        "strftime"
+    ]
+}
