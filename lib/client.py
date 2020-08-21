@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import OrderedDict
 from . import gofers
 import allure
 import requests
@@ -25,7 +26,7 @@ class HttpClient(requests.Session):
     def http(self, method, url, **kwargs):
         response = self.request(
             method, _url(url), timeout=HTTP_TIMEOUT, **kwargs)
-        info = dict(
+        info = OrderedDict(
             URL=response.request.url,
             Method=response.request.method,
             Body=None,
@@ -44,7 +45,6 @@ class HttpClient(requests.Session):
             sort_keys=True,
             indent=4
         ).encode('utf-8').decode('unicode_escape')
-        gofers.info(f"请求信息: {desc}")
         allure.attach(desc)
         return response
 

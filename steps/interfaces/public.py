@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2020-07-13 10:01:30
-LastEditTime: 2020-08-12 15:55:27
+LastEditTime: 2020-08-18 14:50:50
 LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: \pytest-requests-allure-example\steps\interfaces\public.py
@@ -19,7 +19,7 @@ def login(
 ):
     login_info = dict(
         username=username,
-        password=password,
+        password=gofers.rsa(password),
     )
     client.get('/oauth/login')
     login_response = client.post(
